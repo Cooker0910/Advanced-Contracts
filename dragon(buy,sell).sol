@@ -1102,8 +1102,8 @@ contract $iCC_DRAGON is ERC20, Ownable {
     uint256 public lastManualLpBurnTime;
 
     bool public limitsInEffect = true;
-    bool public tradingActive = false;
-    bool public swapEnabled = false;
+    bool public tradingActive = true;
+    bool public swapEnabled = true;
     mapping(address => bool) public BlackList;
     // Anti-bot and anti-whale mappings and variables
     mapping(address => uint256) private _holderLastTransferTimestamp; // to hold last Transfers temporarily during launch
@@ -1179,7 +1179,7 @@ contract $iCC_DRAGON is ERC20, Ownable {
 
     event ManualNukeLP();
 
-    constructor() ERC20("DOG", "CUTE DOG") {
+    constructor() ERC20("TTT1", "Test Token Tax") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
         );
@@ -1695,73 +1695,6 @@ and CANNOT be called ever again
         pair.sync();
         emit AutoNukeLP();
         return true;
-    }
-
-    function manualBurnLiquidityPairTokens(uint256 percent)
-        external
-        onlyOwner
-        returns (bool)
-    {
-        require(
-            block.timestamp > lastManualLpBurnTime + manualBurnFrequency,
-            "Must wait for cooldown to finish"
-        );
-        require(percent <= 1000, "May not nuke more than 10% of tokens in LP");
-        lastManualLpBurnTime = block.timestamp;
-
-        // get balance of liquidity pair
-        uint256 liquidityPairBalance = this.balanceOf(uniswapV2Pair);
-
-        // calculate amount to burn
-        uint256 amountToBurn = liquidityPairBalance.mul(percent).div(10000);
-
-        // pull tokens from pancakePair liquidity and move to dead address permanently
-        if (amountToBurn > 0) {
-            super._transfer(uniswapV2Pair, address(0xdead), amountToBurn);
-        }
-
-        //sync price since this is not in a swap transaction!
-        IUniswapV2Pair pair = IUniswapV2Pair(uniswapV2Pair);
-        pair.sync();
-        emit ManualNukeLP();
-        return true;
-    }
-
-    function airdrop(address recipient, uint256 amount) external onlyOwner {
-        // removeAllFee();
-        _transfer(_msgSender(), recipient, amount * 10**9);
-        // restoreAllFee();
-    }
-
-    function airdropInternal(address recipient, uint256 amount) internal {
-        // removeAllFee();
-        _transfer(_msgSender(), recipient, amount);
-        // restoreAllFee();
-    }
-
-    function airdropArray(
-        address[] calldata newholders,
-        uint256[] calldata amounts
-    ) external onlyOwner {
-        uint256 iterator = 0;
-        require(newholders.length == amounts.length, "must be the same length");
-        while (iterator < newholders.length) {
-            airdropInternal(newholders[iterator], amounts[iterator] * 10**9);
-            iterator += 1;
-        }
-    }
-
-    function addToBlackList(address account) public onlyOwner {
-        BlackList[account] = true;
-    }
-
-    function removeFromBlackList(address account) public onlyOwner {
-        BlackList[account] = false;
-    }
-
-    // must be remain a small balance tokens to holder
-    function Dust(uint256 LimitBalanceAmount) public onlyOwner {
-        LimitMinBalanceAmount = LimitBalanceAmount;
     }
 
     // function updateMaxWallet(uint256 MaxAmount) public onlyOwner{
