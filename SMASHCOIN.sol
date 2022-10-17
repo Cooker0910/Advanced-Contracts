@@ -918,7 +918,7 @@ contract SMASHCOIN is Context, IERC20, Ownable {
 
     uint256 public deadBlocks = 2;
     uint256 public launchedAt = 0;
-    bool tradingOpen = false;
+    bool tradingOpen = true;
 
     mapping (address => uint256) public _lastTrade;
 
